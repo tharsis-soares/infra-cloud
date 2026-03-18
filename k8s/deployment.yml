@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: infra-demo
+  namespace: default
+  labels:
+    app: infra-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: infra-demo
+  template:
+    metadata:
+      labels:
+        app: infra-demo
+    spec:
+      containers:
+        - name: infra-demo
+          image: tharsissoares/infra-demo:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: infra-demo-config
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
